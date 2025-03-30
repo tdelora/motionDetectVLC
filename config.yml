@@ -1,0 +1,23 @@
+---
+
+
+# os-environment lets you specify and environment variables you wish to be set.
+os-environment:
+  QT_QPA_PLATFORM: wayland
+
+vlc-fullscreen: true  # Set VLC to be full screen
+starting-video: /home/pi/animations/startinVideo.mp4  # Video to run when the script starts
+no-motion-video: /home/pi/animations/noMotionVideo.mp4  # Video to run when a no motion even occurs
+
+# Videos to run when a motion event occurs
+motion-videos:
+  - /home/pi/animations/motionVideo1.mov
+  - /home/pi/animations/motionVideo2.mov
+  - /home/pi/animations/motionVideo3.mov
+
+# Bored timer settings
+bored-time: 240  # Bored timer duration
+# Videos to run when the bored timer fires
+bored-videos:
+  - /home/pi/animations/boredVideo1.mov
+  - /home/pi/animations/boredVideo2.mp4
