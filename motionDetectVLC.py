@@ -336,5 +336,10 @@ try:
 	if __name__ == "__main__":
 		main()
 
-except ZeroDivisionError as e:
-        print(f"Error: {e}")
+except Exception as e:
+        print(f"{type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}")
+
+finally:
+	# Future features
+	print()
+	print("Closing down")
