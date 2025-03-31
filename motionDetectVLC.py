@@ -18,10 +18,10 @@ vlcInstance = vlc.Instance()
 vlcPlayer = vlcInstance.media_player_new()
 
 # Other VLC related variables
-vlcFullscreen = True
+vlcFullscreen = False
 
 # Motion sensor setup
-pir = MotionSensor(12) # Out for GPIO12
+motionSensorPin = 12
 triggers = 0
 
 # Video to play when the program starts
@@ -55,7 +55,7 @@ try:
 			# print(data[key])
 			return data[key]
 		else:
-			print(f"Key {key} not found")
+			# print(f"Key {key} not found")
 			return None
 
 
@@ -75,6 +75,7 @@ try:
 		global timeUntilBored
 		global boredVideoList
 		global vlcFullscreen
+		global motionSensorPin
 		returnValue = True
 
 		fileCheck = Path(configFile)
@@ -82,30 +83,36 @@ try:
 			with open(configFile,"r") as file:
 				data = yaml.safe_load(file)
 
-			# Verify the core needs starting with startingVideo
+			# Verify user provided configuration
+
+			# Verify startingVideo (Manditory)
 			startingVideo = findKey(data,"starting-video")
 			fileCheck = Path(startingVideo)
 			if fileCheck.exists() == False:
 				print(f"Starting video {startingVideo} does not exist")
 				returnValue = False
 
-			# Verify motionVideoList
-			currentFile = 0
+			# Verify motionVideoList (Manditory)
 			motionVideoList = findKey(data,"motion-videos")
-			while currentFile < len(motionVideoList):
-				# print(motionVideoList[currentFile])
-				fileCheck = Path(motionVideoList[currentFile])
-				if fileCheck.exists() == False:
-					removedFile = motionVideoList.pop(currentFile)
-					print(f"Motion video {removedFile} does not exist - removed from list")
-					currentFile -= 1
-				currentFile += 1
-			if len(motionVideoList) == 0:
-				# Nothing survived the pruning...
-				print("Motion video list is empty - aborting")
+			if type(motionVideoList) is list:
+				currentFile = 0
+				while currentFile < len(motionVideoList):
+					# print(motionVideoList[currentFile])
+					fileCheck = Path(motionVideoList[currentFile])
+					if fileCheck.exists() == False:
+						removedFile = motionVideoList.pop(currentFile)
+						print(f"Motion video {removedFile} does not exist - removed from list")
+						currentFile -= 1
+					currentFile += 1
+				if len(motionVideoList) == 0:
+					# Nothing survived the pruning...
+					print("Motion video list is empty - aborting")
+					returnValue = False
+			else:
+				print(f"motion-videos specified in {configFile} is not a list")
 				returnValue = False
 
-			# Verify noMotionVideo
+			# Verify noMotionVideo (Optional)
 			noMotionVideo = findKey(data,"no-motion-video")
 			if noMotionVideo != None:
 				fileCheck = Path(noMotionVideo)
@@ -114,26 +121,35 @@ try:
 					print(f"No motion video {noMotionVideo} does not exist - functionality disabled")
 					noMotionVideo = ""
 
-			# Verify boredVideoList
-			currentFile = 0
+			# Verify boredVideoList (Optional)
 			boredVideoList = findKey(data,"bored-videos")
-			while currentFile < len(boredVideoList):
-				# print(boredVideoList[currentFile])
-				fileCheck = Path(boredVideoList[currentFile])
-				if fileCheck.exists() == False:
-					removedFile = boredVideoList.pop(currentFile)
-					print(f"Bored video {removedFile} does not exist - removed from list")
-					currentFile -= 1
-				currentFile += 1
-			if len(boredVideoList) == 0:
-				# Nothing survived the pruning however this is survivable. But no bored videos will run.
-				timeUntilBored = 0
-				print("Bored video list is empty - bored timer disabled")
+			if boredVideoList != None:
+				if type(boredVideoList) is list:
+					currentFile = 0
+					while currentFile < len(boredVideoList):
+						# print(boredVideoList[currentFile])
+						fileCheck = Path(boredVideoList[currentFile])
+						if fileCheck.exists() == False:
+							removedFile = boredVideoList.pop(currentFile)
+							print(f"Bored video {removedFile} does not exist - removed from list")
+							currentFile -= 1
+						currentFile += 1
+					if len(boredVideoList) == 0:
+						# Nothing survived the pruning however this is survivable. But no bored videos will run.
+						timeUntilBored = 0
+						print("Bored video list is empty - bored timer disabled")
+				else:
+					print(f"bored-videos specified in {configFile} is not a list")
+					returnValue = False
 
 			# The bored timer has a default of 180 seconds, check if an updated value has been provided.
 			tempTime = findKey(data,"bored-time")
 			if tempTime != None:
-				timeUntilBored = tempTime
+				if type(tempTime) is int:
+					timeUntilBored = tempTime
+				else:
+					print(f"bored-time specified in {configFile} is not an int")
+					returnValue = False
 
 			# vlcFullscreen has a default value of True, check if an updated value has been provided.
 			vlcFullscreenTmp = findKey(data,"vlc-fullscreen")
@@ -141,6 +157,20 @@ try:
 				vlcFullscreen = vlcFullscreenTmp
 			else:
 				print(f"vlc-fullscreen specified in {configFile} is not a bool")
+
+			# Set motionSensorPin (Optional, Defaulted to pin 12)
+			motionSensorPinTmp = findKey(data,"motion-sensor-pin")
+			if motionSensorPinTmp != None:
+				if type(motionSensorPinTmp) is int:
+					if motionSensorPinTmp >= 2 and motionSensorPinTmp <= 27:
+						# A valid Raspberry Pi GPIO pin
+						motionSensorPin = motionSensorPinTmp
+					else:
+						print(f"motion-sensor-pin specified as {motionSensorPinTmp} in {configFile} is out of range (2 to 27)")
+						returnValue = False
+				else:
+					print(f"motion-sensor-pin specified in {configFile} is not an int")
+					returnValue = False
 
 			# Load optional environment settings. This will be checked/used in main()
 			osEnvironment = findKey(data,"os-environment")
@@ -288,6 +318,7 @@ try:
 
 				vlcPlayer.set_fullscreen(vlcFullscreen)
 
+				pir = MotionSensor(motionSensorPin)
 				pir.when_motion = motionDetected
 				pir.when_no_motion = noMotionDetected
 				print("Detection started")

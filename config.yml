@@ -6,10 +6,11 @@ os-environment:
   QT_QPA_PLATFORM: wayland
 
 vlc-fullscreen: true  # Set VLC to be full screen
-starting-video: /home/pi/animations/startinVideo.mp4  # Video to run when the script starts
+starting-video: /home/pi/animations/startinVideo.mp4  # Video to run when the script starts, manditory
 no-motion-video: /home/pi/animations/noMotionVideo.mp4  # Video to run when a no motion even occurs
+motion-sensor-pin: 12  #GPIO pin to use for motion detection. Optional, default is pin 12
 
-# Videos to run when a motion event occurs
+# Videos to run when a motion event occurs. List is manditory
 motion-videos:
   - /home/pi/animations/motionVideo1.mov
   - /home/pi/animations/motionVideo2.mov
