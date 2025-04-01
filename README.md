@@ -1,5 +1,5 @@
 # motionDetectVLC
-Python script for Raspberry Pi which detects motion and plays videos when triggered.  The script reads a yaml file for mandatory and optional parameters (See config.yml). The script plays an optional startup video and then waits for motion and no-motion events to play specified videos. Optionally the script plays "bored" videos at a specified interval. In all cases, once a video is started it will be played to completion, subsequent events of any type will not interrupt a video in progress.
+Python script for Raspberry Pi which detects motion and plays videos when triggered.  The script reads a yaml file for mandatory and optional parameters (See config.yml), plays an optional startup video then waits for motion and no-motion events to play specified videos. Optionally the script plays "bored" videos at a specified interval. In all cases, once a video is started it will be played to completion, subsequent events of any type will not interrupt a video in progress.
 
 Mandatory yaml Parameters:
 - starting-video (string): Video to be played when script starts.
