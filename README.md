@@ -18,6 +18,8 @@ Hardware utilized
 - Link: https://a.co/d/0X1S8th
 - HiLetgo 3pcs HC-SR501 PIR Infrared Sensor Human Body Infrared Motion Module for Arduino Raspberry Pi (Amazon)
 - Link: https://a.co/d/7auf7Qe
+- SIM&NAT 8inch / 20cm Wire Ribbon Cables kit for Arduino Raspberry Pi 2/3
+- Link: https://a.co/d/fxIIGYs
 
 Other Notes:
 - Originally written as part of a Halloween jumpscare gag, it has been cleaned up for genetic use.
