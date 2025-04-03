@@ -179,6 +179,23 @@ try:
 					print(f"motion-sensor-pin specified in {configFile} is not an int")
 					returnValue = False
 
+			# ledOps has a default value of False, check if an updated value has been provided.
+			ledOpsTmp = findKey(data,"led-ops")
+			if type(ledOpsTmp) is bool:
+				ledOps = ledOpsTmp
+			else:
+				print(f"led-ops specified in {configFile} is not a bool")
+
+			# led-colors is a dictionaary that sets the colors used in the various operational phases
+			ledColors = findKey(data,"led-colors")
+			if ledColors != None and type(ledColors) is dict:
+				# Run thru the entries and set appropriately
+				print("led-color is a dict") # Tmp
+				# Validate colors then set color for mode
+			else:
+				print(f"led-colors specified in {configFile} is not a dictionary")
+
+
 			# Load optional environment settings. This will be checked/used in main()
 			osEnvironment = findKey(data,"os-environment")
 		else:
