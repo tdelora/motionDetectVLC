@@ -45,10 +45,10 @@ boredVideoList = ""
 
 # LED
 ledOps = False
-startupColor = #FF0000
-motionColor = #FF0000
-noMotionColor = #FF0000
-boredColor = #FF0000
+startupColor = "#FFFF00"
+motionColor = "#00FF00"
+noMotionColor = "#2E8B57"
+boredColor = "#0000FF"
 
 try:
 
