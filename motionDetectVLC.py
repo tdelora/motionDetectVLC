@@ -43,6 +43,13 @@ timeUntilBored = 180
 currentBoredVideo = 0
 boredVideoList = ""
 
+# LED
+ledOps = False
+startupColor = #FF0000
+motionColor = #FF0000
+noMotionColor = #FF0000
+boredColor = #FF0000
+
 try:
 
 	#
