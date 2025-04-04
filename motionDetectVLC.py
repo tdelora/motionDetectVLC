@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 
 from gpiozero import MotionSensor
-import os
 from pathlib import Path
 from signal import pause
-import sys
-import threading
-import time
-import vlc
-import yaml
+import os, sys, threading, time, vlc, yaml
+import mdvLED, mdvUtils
+
 
 #OS environment setup
 osEnvironment = ""
@@ -42,13 +39,6 @@ boredTimer = threading.Timer(1,None)
 timeUntilBored = 180
 currentBoredVideo = 0
 boredVideoList = ""
-
-# LED
-ledOps = False
-startupColor = "#FFFF00"
-motionColor = "#00FF00"
-noMotionColor = "#2E8B57"
-boredColor = "#0000FF"
 
 try:
 
@@ -165,36 +155,14 @@ try:
 			else:
 				print(f"vlc-fullscreen specified in {configFile} is not a bool")
 
-			# Set motionSensorPin (Optional, Defaulted to pin 12)
+			# Set motionSensorPin (Optional, Defaulted to pin 12, and will be none if no key/value pair is present)
 			motionSensorPinTmp = findKey(data,"motion-sensor-pin")
 			if motionSensorPinTmp != None:
-				if type(motionSensorPinTmp) is int:
-					if motionSensorPinTmp >= 2 and motionSensorPinTmp <= 27:
-						# A valid Raspberry Pi GPIO pin
-						motionSensorPin = motionSensorPinTmp
-					else:
-						print(f"motion-sensor-pin specified as {motionSensorPinTmp} in {configFile} is out of range (2 to 27)")
-						returnValue = False
+				if mdvUtils.validateGPIOPin("motion-sensor-pin",motionSensorPinTmp):
+					motionSensorPin = motionSensorPinTmp
 				else:
-					print(f"motion-sensor-pin specified in {configFile} is not an int")
+					# motion-sensor-pin was not valid for some reason.
 					returnValue = False
-
-			# ledOps has a default value of False, check if an updated value has been provided.
-			ledOpsTmp = findKey(data,"led-ops")
-			if type(ledOpsTmp) is bool:
-				ledOps = ledOpsTmp
-			else:
-				print(f"led-ops specified in {configFile} is not a bool")
-
-			# led-colors is a dictionaary that sets the colors used in the various operational phases
-			ledColors = findKey(data,"led-colors")
-			if ledColors != None and type(ledColors) is dict:
-				# Run thru the entries and set appropriately
-				print("led-color is a dict") # Tmp
-				# Validate colors then set color for mode
-			else:
-				print(f"led-colors specified in {configFile} is not a dictionary")
-
 
 			# Load optional environment settings. This will be checked/used in main()
 			osEnvironment = findKey(data,"os-environment")

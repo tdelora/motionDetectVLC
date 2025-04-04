@@ -9,3 +9,13 @@ Thank you newbiely.com
 
 import RPi.GPIO as GPIO
 from time import sleep
+import mdvUtils
+
+
+def _map(x, in_min, in_max, out_min, out_max):
+    return int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+
+def setColor(r,g,b):
+    RED.ChangeDutyCycle(_map(r, 0, 255, 0, 100))
+    GREEN.ChangeDutyCycle(_map(g, 0, 255, 0, 100))
+    BLUE.ChangeDutyCycle(_map(b, 0, 255, 0, 100))
