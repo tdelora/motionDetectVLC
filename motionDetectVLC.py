@@ -185,7 +185,7 @@ try:
 	#   - Logs an error if videoFile does not exist.
 	#
 
-	def playVideo(videoFile):
+	def playVideo(videoFile,colorHexString):
 		videoCheck = Path(videoFile)
 		returnValue = True
 
@@ -194,10 +194,12 @@ try:
 				print(f"Playing {videoFile}")
 				media = vlcInstance.media_new_path(videoFile)
 				vlcPlayer.set_media(media)
+				ledStatus.setColor(colorHexString)
 				vlcPlayer.play()
 				time.sleep(3)
 				while vlcPlayer.is_playing():
 					time.sleep(1)
+				ledStatus.setColor(ledStatusClass.statusModes['waiting'])
 			else:
 				print()
 				print("A video is currently playing")
@@ -224,17 +226,15 @@ try:
 		global motionVideoList
 
 		triggers = triggers + 1
-		ledStatus.setColor(48, 25, 52) # Dark Purple
 		print()
 		print(f"Motion {triggers} detected...")
 
-		playVideo(motionVideoList[currentMotionVideo])
+		playVideo(motionVideoList[currentMotionVideo],ledStatusClass.statusModes['motion'])
 
 		currentMotionVideo += 1
 		if currentMotionVideo == len(motionVideoList):
 			currentMotionVideo = 0
 		print("Motion detected complete")
-		ledStatus.setColor(0, 255, 0) # Green
 
 
 	#
@@ -243,13 +243,11 @@ try:
 	#
 
 	def noMotionDetected():
-		ledStatus.setColor(255, 128, 0) # Orange
 		print()
 		print("No motion...")
 		if noMotionVideo != None and len(noMotionVideo):
-			playVideo(noMotionVideo)
+			playVideo(noMotionVideo,ledStatusClass.statusModes['motion'])
 		print("No motion detected complete")
-		ledStatus.setColor(0, 255, 0) # Green
 
 
 	#
@@ -278,16 +276,14 @@ try:
 		global boredVideoList
 		global currentBoredVideo
 
-		ledStatus.setColor(0, 0, 255) # Blue
 		print()
 		print("I'm bored...")
-		playVideo(boredVideoList[currentBoredVideo])
+		playVideo(boredVideoList[currentBoredVideo],ledStatusClass.statusModes['bored'])
 		currentBoredVideo += 1
 		if currentBoredVideo == len(boredVideoList):
 			currentBoredVideo = 0
 		setBoredTimer()
 		print("No longer bored...")
-		ledStatus.setColor(0, 255, 0) # Green
 
 
 	#
@@ -319,7 +315,7 @@ try:
 						os.environ[key] = value
 
 				ledStatus.start(showLEDStatus)
-				ledStatus.setColor(255, 0, 0) # Red
+				ledStatus.setColor(ledStatusClass.statusModes['start'])
 
 				vlcPlayer.set_fullscreen(vlcFullscreen)
 
@@ -330,7 +326,7 @@ try:
 				print()
 
 				setBoredTimer()
-				playVideo(startingVideo)
+				playVideo(startingVideo,ledStatusClass.statusModes['start'])
 
 				pause()
 		else:

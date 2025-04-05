@@ -22,3 +22,19 @@ def validateHexColor(hexColor):
 			print("good")
 
 	return returnValue
+
+
+def colorHexTo8bit(hexString):
+	redVal = 0
+	greenVal = 0
+	blueVal = 0
+
+	if type(hexString) is str and len(hexString) == 7:
+		redVal = int(hexString[1:3],16)
+		greenVal = int(hexString[3:5],16)
+		blueVal = int(hexString[5:],16)
+		# print(f"colorHexTo8bit: {hexString}: r:{redVal} g:{greenVal} b:{blueVal}")
+	else:
+		print(f"colorHexTo8bit: Not a string or not a valid hex color string length: {hexString}")
+
+	return redVal, greenVal, blueVal
