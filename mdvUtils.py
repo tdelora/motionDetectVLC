@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import string
 
 def validateGPIOPin(pinSpec,pinNum):
 	returnValue = False
@@ -15,11 +16,14 @@ def validateGPIOPin(pinSpec,pinNum):
 	return returnValue
 
 
-def validateHexColor(hexColor):
+def validateHexColor(hexString):
 	returnValue = False
-	if hexColor != None:
-		if len(hexColor) == 7 and type(hexColor) is str:
-			print("good")
+	if type(hexString) is str and len(hexString) == 7:
+		if hexString[0:1] == "#":
+			returnValue = all(c in string.hexdigits for c in hexString[1:])
+
+	if returnValue == False:
+		print(f"mdvUtils.validateHexColor: {hexString} is an invalid color hex string")
 
 	return returnValue
 
@@ -29,12 +33,10 @@ def colorHexTo8bit(hexString):
 	greenVal = 0
 	blueVal = 0
 
-	if type(hexString) is str and len(hexString) == 7:
+	if validateHexColor(hexString):
 		redVal = int(hexString[1:3],16)
 		greenVal = int(hexString[3:5],16)
 		blueVal = int(hexString[5:],16)
 		# print(f"colorHexTo8bit: {hexString}: r:{redVal} g:{greenVal} b:{blueVal}")
-	else:
-		print(f"colorHexTo8bit: Not a string or not a valid hex color string length: {hexString}")
 
 	return redVal, greenVal, blueVal
