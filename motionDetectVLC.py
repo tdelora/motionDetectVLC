@@ -4,7 +4,8 @@ from gpiozero import MotionSensor
 from pathlib import Path
 from signal import pause
 import os, sys, threading, time, vlc, yaml
-import mdvLED, mdvUtils
+import mdvUtils
+from mdvLED import ledStatusClass
 
 
 #OS environment setup
@@ -15,7 +16,7 @@ vlcInstance = vlc.Instance()
 vlcPlayer = vlcInstance.media_player_new()
 
 # Other VLC related variables
-vlcFullscreen = False
+vlcFullscreen = True
 
 # Motion sensor setup
 motionSensorPin = 12
@@ -39,6 +40,9 @@ boredTimer = threading.Timer(1,None)
 timeUntilBored = 180
 currentBoredVideo = 0
 boredVideoList = ""
+
+showLEDStatus = True
+ledStatus = ledStatusClass()
 
 try:
 
@@ -220,6 +224,7 @@ try:
 		global motionVideoList
 
 		triggers = triggers + 1
+		ledStatus.setColor(48, 25, 52) # Dark Purple
 		print()
 		print(f"Motion {triggers} detected...")
 
@@ -229,6 +234,7 @@ try:
 		if currentMotionVideo == len(motionVideoList):
 			currentMotionVideo = 0
 		print("Motion detected complete")
+		ledStatus.setColor(0, 255, 0) # Green
 
 
 	#
@@ -237,11 +243,13 @@ try:
 	#
 
 	def noMotionDetected():
+		ledStatus.setColor(255, 128, 0) # Orange
 		print()
 		print("No motion...")
 		if noMotionVideo != None and len(noMotionVideo):
 			playVideo(noMotionVideo)
 		print("No motion detected complete")
+		ledStatus.setColor(0, 255, 0) # Green
 
 
 	#
@@ -270,6 +278,7 @@ try:
 		global boredVideoList
 		global currentBoredVideo
 
+		ledStatus.setColor(0, 0, 255) # Blue
 		print()
 		print("I'm bored...")
 		playVideo(boredVideoList[currentBoredVideo])
@@ -278,6 +287,7 @@ try:
 			currentBoredVideo = 0
 		setBoredTimer()
 		print("No longer bored...")
+		ledStatus.setColor(0, 255, 0) # Green
 
 
 	#
@@ -308,6 +318,9 @@ try:
 					for key,value in osEnvironment.items():
 						os.environ[key] = value
 
+				ledStatus.start(showLEDStatus)
+				ledStatus.setColor(255, 0, 0) # Red
+
 				vlcPlayer.set_fullscreen(vlcFullscreen)
 
 				pir = MotionSensor(motionSensorPin)
@@ -330,5 +343,7 @@ try:
 
 finally:
 	# Future features
+
+	ledStatus.stop()
 	print()
 	print("Closing down")

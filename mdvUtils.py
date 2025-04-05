@@ -15,8 +15,10 @@ def validateGPIOPin(pinSpec,pinNum):
 	return returnValue
 
 
-def validateHexColor():
-        returnValue = True
+def validateHexColor(hexColor):
+	returnValue = False
+	if hexColor != None:
+		if len(hexColor) == 7 and type(hexColor) is str:
+			print("good")
 
-
-        return returnValue
+	return returnValue
