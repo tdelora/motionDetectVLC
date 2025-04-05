@@ -246,7 +246,7 @@ try:
 		print()
 		print("No motion...")
 		if noMotionVideo != None and len(noMotionVideo):
-			playVideo(noMotionVideo,ledStatusClass.statusModes['motion'])
+			playVideo(noMotionVideo,ledStatusClass.statusModes['no_motion'])
 		print("No motion detected complete")
 
 
