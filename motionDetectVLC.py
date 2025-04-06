@@ -8,8 +8,8 @@ import mdvUtils
 from mdvLED import ledStatusClass
 
 
-#OS environment setup
-osEnvironment = ""
+#OS environment setup 
+osEnvironment = {}
 
 # Initial VLC setup: Create VLC instance and player
 vlcInstance = vlc.Instance()
@@ -41,25 +41,11 @@ timeUntilBored = 180
 currentBoredVideo = 0
 boredVideoList = ""
 
-showLEDStatus = True
+# Optionally an LED can be utilized to indicate the current execution status
 ledStatus = ledStatusClass()
+showLEDStatus = True
 
 try:
-
-	#
-	# Function findKey looks for a key/value pair in a data string
-	#
-
-	def findKey(data,key):
-		if key in data.keys():
-			# print(len(data[key]))
-			# print(data[key])
-			return data[key]
-		else:
-			# print(f"Key {key} not found")
-			return None
-
-
 	#
 	# Function loadVerifyConfig reads the configuration yaml
 	#  - Verifies the specified file exists before reading it
@@ -77,6 +63,8 @@ try:
 		global boredVideoList
 		global vlcFullscreen
 		global motionSensorPin
+		global ledStatus
+		global showLEDStatus
 		returnValue = True
 
 		fileCheck = Path(configFile)
@@ -87,14 +75,14 @@ try:
 			# Verify user provided configuration
 
 			# Verify startingVideo (Manditory)
-			startingVideo = findKey(data,"starting-video")
+			startingVideo = mdvUtils.findKey(data,"starting-video")
 			fileCheck = Path(startingVideo)
 			if fileCheck.exists() == False:
 				print(f"Starting video {startingVideo} does not exist")
 				returnValue = False
 
 			# Verify motionVideoList (Manditory)
-			motionVideoList = findKey(data,"motion-videos")
+			motionVideoList = mdvUtils.findKey(data,"motion-videos")
 			if type(motionVideoList) is list:
 				currentFile = 0
 				while currentFile < len(motionVideoList):
@@ -114,7 +102,7 @@ try:
 				returnValue = False
 
 			# Verify noMotionVideo (Optional)
-			noMotionVideo = findKey(data,"no-motion-video")
+			noMotionVideo = mdvUtils.findKey(data,"no-motion-video")
 			if noMotionVideo != None:
 				fileCheck = Path(noMotionVideo)
 				if fileCheck.exists() == False:
@@ -123,7 +111,7 @@ try:
 					noMotionVideo = ""
 
 			# Verify boredVideoList (Optional)
-			boredVideoList = findKey(data,"bored-videos")
+			boredVideoList = mdvUtils.findKey(data,"bored-videos")
 			if boredVideoList != None:
 				if type(boredVideoList) is list:
 					currentFile = 0
@@ -144,7 +132,7 @@ try:
 					returnValue = False
 
 			# The bored timer has a default of 180 seconds, check if an updated value has been provided.
-			tempTime = findKey(data,"bored-time")
+			tempTime = mdvUtils.findKey(data,"bored-time")
 			if tempTime != None:
 				if type(tempTime) is int:
 					timeUntilBored = tempTime
@@ -153,14 +141,14 @@ try:
 					returnValue = False
 
 			# vlcFullscreen has a default value of True, check if an updated value has been provided.
-			vlcFullscreenTmp = findKey(data,"vlc-fullscreen")
+			vlcFullscreenTmp = mdvUtils.findKey(data,"vlc-fullscreen")
 			if type(vlcFullscreenTmp) is bool:
 				vlcFullscreen = vlcFullscreenTmp
 			else:
 				print(f"vlc-fullscreen specified in {configFile} is not a bool")
 
 			# Set motionSensorPin (Optional, Defaulted to pin 12, and will be none if no key/value pair is present)
-			motionSensorPinTmp = findKey(data,"motion-sensor-pin")
+			motionSensorPinTmp = mdvUtils.findKey(data,"motion-sensor-pin")
 			if motionSensorPinTmp != None:
 				if mdvUtils.validateGPIOPin("motion-sensor-pin",motionSensorPinTmp):
 					motionSensorPin = motionSensorPinTmp
@@ -169,7 +157,7 @@ try:
 					returnValue = False
 
 			# Load optional environment settings. This will be checked/used in main()
-			osEnvironment = findKey(data,"os-environment")
+			osEnvironment = mdvUtils.findKey(data,"os-environment")
 		else:
 			print(f"{configFile} does not exist")
 			returnValue = False

@@ -1,6 +1,21 @@
 #!/usr/bin/env python
 import string
 
+
+#
+# Function findKey looks for a key/value pair in a data string
+#
+
+def findKey(data,key):
+	if key in data.keys():
+		# print(len(data[key]))
+		# print(data[key])
+		return data[key]
+	else:
+		# print(f"Key {key} not found")
+		return None
+
+
 def validateGPIOPin(pinSpec,pinNum):
 	returnValue = False
 	if pinNum != None:
