@@ -36,22 +36,22 @@ class ledStatusClass:
 
 		if type(ledConfig) is dict:
 			# Check for updates to gpioPins
-			for key in gpioPins.keys():
+			for key in self.gpioPins.keys():
 				tmpPinInfo = mdvUtils.findKey(ledConfig,key)
 				if tmpPinInfo != None:
 					if mdvUtils.validateGPIOPin(key,tmpPinInfo):
 						# A new pin number has been provided for this key
-						gpioPin[key] = tmpPinInfos
+						self.gpioPin[key] = tmpPinInfos
 					else:
 						returnValue = False
 
 			# Check for updates to statusModes
-			for key in statusModes.keys():
+			for key in self.statusModes.keys():
 				tmpHexString = mdvUtils.findKey(ledConfig,key)
 				if tmpHexString != None:
 					if mdvUtils.validateHexColor(tmpHexString):
 						# A new color has been provided for this key
-						statusModes[key] = tmpHexString
+						self.statusModes[key] = tmpHexString
 					else:
 						returnValue = False
 
