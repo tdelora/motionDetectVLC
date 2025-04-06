@@ -15,6 +15,25 @@ def findKey(data,key):
 		# print(f"Key {key} not found")
 		return None
 
+def dictionaryUpdate(updateDict,destDict):
+	tmpDict = destDict
+
+	if type(destDict) is dict:
+		if type(updateDict) is dict:
+			for key in tmpDict.keys():
+				value = findKey(updateDict,key)
+				if value != None:
+					if type(tmpDict[key]) == type(value):
+						tmpDict[key] = value
+					else:
+						print(f"mdvUtils.dictionaryUpdate: type received for key {key} mismatch: received: " + str(type(value)) + " expected: " + str(type(tmpDict[key])))
+		else:
+			print(f"mdvUtils.dictionaryUpdate: item received to read for updates is not a dictionary")
+	else:
+		print(f"mdvUtils.dictionaryUpdate: item received as destination is not a dictionary")
+
+	return tmpDict
+
 
 def validateGPIOPin(pinSpec,pinNum):
 	returnValue = False
