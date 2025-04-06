@@ -43,7 +43,7 @@ boredVideoList = ""
 
 # Optionally an LED can be utilized to indicate the current execution status
 ledStatus = ledStatusClass()
-showLEDStatus = True
+showLEDStatus = False
 
 try:
 	#
@@ -141,9 +141,9 @@ try:
 					returnValue = False
 
 			# vlcFullscreen has a default value of True, check if an updated value has been provided.
-			vlcFullscreenTmp = mdvUtils.findKey(data,"vlc-fullscreen")
-			if type(vlcFullscreenTmp) is bool:
-				vlcFullscreen = vlcFullscreenTmp
+			boolTmp = mdvUtils.findKey(data,"vlc-fullscreen")
+			if type(boolTmp) is bool:
+				vlcFullscreen = boolTmp
 			else:
 				print(f"vlc-fullscreen specified in {configFile} is not a bool")
 
@@ -155,6 +155,16 @@ try:
 				else:
 					# motion-sensor-pin was not valid for some reason.
 					returnValue = False
+
+			# showLEDStatus has a default value of False, check if an updated value has been provided.
+			boolTmp = mdvUtils.findKey(data,"led-status")
+			if type(boolTmp) is bool:
+				showLEDStatus = boolTmp
+			else:
+				print(f"led-status specified in {configFile} is not a bool")
+
+			# New LED configuraions (pin numbers, status colors) may have been provided
+			returnValue = ledStatus.configure(mdvUtils.findKey(data,"led-config"))
 
 			# Load optional environment settings. This will be checked/used in main()
 			osEnvironment = mdvUtils.findKey(data,"os-environment")

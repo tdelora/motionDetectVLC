@@ -31,19 +31,32 @@ class ledStatusClass:
 			self.GREEN.ChangeDutyCycle(self._duty(greenVal, 0, 255, 0, 100))
 			self.BLUE.ChangeDutyCycle(self._duty(blueVal, 0, 255, 0, 100))
 
-	def configure(ledConfig):
+	def configure(self,ledConfig):
 		returnValue = True
 
-		if len(ledConfig) != 0 and type(ledConfig) is dict:
+		if type(ledConfig) is dict:
 			# Check for updates to gpioPins
-			# for key in gpioPins.items():
+			for key in gpioPins.keys():
+				tmpPinInfo = mdvUtils.findKey(ledConfig,key)
+				if tmpPinInfo != None:
+					if mdvUtils.validateGPIOPin(key,tmpPinInfo):
+						# A new pin number has been provided for this key
+						gpioPin[key] = tmpPinInfos
+					else:
+						returnValue = False
 
 			# Check for updates to statusModes
-			# for key in statusModes.items():
+			for key in statusModes.keys():
+				tmpHexString = mdvUtils.findKey(ledConfig,key)
+				if tmpHexString != None:
+					if mdvUtils.validateHexColor(tmpHexString):
+						# A new color has been provided for this key
+						statusModes[key] = tmpHexString
+					else:
+						returnValue = False
 
-			print(f"mdvLED.configure: good")
-		else:
-			print(f"mdvLED.configure: received configureation has zero length or is not a dictionary")
+		elif ledConfig != None:
+			print(f"mdvLED.configure: Received config info is not a dictionary")
 			returnValue = False
 
 		return returnValue
