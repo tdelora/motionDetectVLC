@@ -5,7 +5,8 @@
 os-environment:
   QT_QPA_PLATFORM: wayland
 
-vlc-fullscreen: false  # Set VLC to be full screen
+vlc-fullscreen: False  # Set VLC to be full screen
+led-status: False # Use LED to indicate status
 starting-video: /home/pi/animations/startinVideo.mp4  # Video to run when the script starts, manditory
 no-motion-video: /home/pi/animations/noMotionVideo.mp4  # Video to run when a no motion even occurs
 motion-sensor-pin: 12  #GPIO pin to use for motion detection. Optional, default is pin 12
