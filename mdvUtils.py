@@ -15,24 +15,38 @@ def findKey(data,key):
 		# print(f"Key {key} not found")
 		return None
 
-def dictionaryUpdate(updateDict,destDict):
+def dictionaryUpdate(updateDict,destDict,validateFunc):
+	returnValue = True
 	tmpDict = destDict
 
 	if type(destDict) is dict:
-		if type(updateDict) is dict:
+		updateType = type(updateDict)
+		if updateType is dict:
 			for key in tmpDict.keys():
 				value = findKey(updateDict,key)
 				if value != None:
-					if type(tmpDict[key]) == type(value):
-						tmpDict[key] = value
+					if validateFunc != None:
+						# Check each potential change, if any come back false change returnValue to False
+						# Doing it this way reveals all issues in the dictionary
+						validateReturnValue = validateFunc(key,value)
+						if validateReturnValue:
+							# All good for this one
+							tmpDict[key] = value
+						else:
+							# We encountered an issue
+							returnValue = False
 					else:
-						print(f"mdvUtils.dictionaryUpdate: type received for key {key} mismatch: received: " + str(type(value)) + " expected: " + str(type(tmpDict[key])))
-		else:
-			print(f"mdvUtils.dictionaryUpdate: item received to read for updates is not a dictionary")
+						print(f"mdvUtils.dictionaryUpdate: Updating {key} without validating")
+						tmpDict[key] = value
+						returnValue = False
+		elif updateType is not type(None):
+			print(f"mdvUtils.dictionaryUpdate: item received to read for updates is " + str(updateType) + " not a dictionary")
+			returnValue = False
 	else:
 		print(f"mdvUtils.dictionaryUpdate: item received as destination is not a dictionary")
+		returnValue = False
 
-	return tmpDict
+	return returnValue, tmpDict
 
 
 def validateGPIOPin(pinSpec,pinNum):
@@ -50,14 +64,14 @@ def validateGPIOPin(pinSpec,pinNum):
 	return returnValue
 
 
-def validateHexColor(hexString):
+def validateHexColor(mode,hexString):
 	returnValue = False
 	if type(hexString) is str and len(hexString) == 7:
 		if hexString[0:1] == "#":
 			returnValue = all(c in string.hexdigits for c in hexString[1:])
 
 	if returnValue == False:
-		print(f"mdvUtils.validateHexColor: {hexString} is an invalid color hex string")
+		print(f"mdvUtils.validateHexColor: {hexString} for specification '{mode}' is an invalid color hex string")
 
 	return returnValue
 
@@ -67,7 +81,7 @@ def colorHexTo8bit(hexString):
 	greenVal = 0
 	blueVal = 0
 
-	if validateHexColor(hexString):
+	if validateHexColor("mdvUtils.colorHexTo8bit",hexString):
 		redVal = int(hexString[1:3],16)
 		greenVal = int(hexString[3:5],16)
 		blueVal = int(hexString[5:],16)

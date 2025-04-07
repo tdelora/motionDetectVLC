@@ -35,24 +35,21 @@ class ledStatusClass:
 		returnValue = True
 
 		if type(ledConfig) is dict:
-			self.gpioPins = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"gpioPins"),self.gpioPins)
-			self.statusModes = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"statusModes"),self.statusModes)
-
-			# Validate the led pin settings
-			for key,value in self.gpioPins.items():
-				if mdvUtils.validateGPIOPin(key,value) == False:
-					returnValue = False
-
-			# Validate the status colors
-			for key,value in self.statusModes.items():
-				if mdvUtils.validateHexColor(value) == False:
-					returnValue = False
+			# Check each dictionary seperately so all issues will be displayed at once vs one at a time
+			pinReturnValue, self.gpioPins = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"gpioPins"),self.gpioPins,mdvUtils.validateGPIOPin)
+			modeReturnValue, self.statusModes = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"statusModes"),self.statusModes,mdvUtils.validateHexColor)
+			if pinReturnValue != True or modeReturnValue != True:
+				# One of the dictionaries had an issue
+				returnValue = False
 		elif ledConfig != None:
 			print(f"mdvLED.configure: Received config info is not a dictionary")
 			returnValue = False
 
 		# print(f"gpioPins: {self.gpioPins}")
 		# print (f"statusModes: {self.statusModes}")
+		# print(f"pinReturnValue: {pinReturnValue}")
+		# print(f"modeReturnValue: {modeReturnValue}")
+		# print(f"returnValue: {returnValue}")
 
 		return returnValue
 
