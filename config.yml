@@ -23,3 +23,15 @@ bored-time: 240  # Bored timer duration
 bored-videos:
   - /home/pi/animations/boredVideo1.mov
   - /home/pi/animations/boredVideo2.mp4
+
+# Optional settings for the GPIO Pins and colors if a status LED is attached.
+# If an update is required you only need to supply the key/value pairs that need updating,
+# the unsupplied key/values will remain the program default(s) the values of which are below.
+led-config:
+  gpioPins: {'redPin':13,'greenPin':6,'bluePin':18}
+  statusModes: {'start':"#FF0000",'bored':"#0000F0",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
+
+# Optional led-status contols if the led status light system is enabled
+# True: enables
+# False: disables
+led-status: True
