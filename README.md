@@ -18,6 +18,8 @@ Hardware utilized
 - Link: https://a.co/d/0X1S8th
 - HiLetgo 3pcs HC-SR501 PIR Infrared Sensor Human Body Infrared Motion Module for Arduino Raspberry Pi (Amazon)
 - Link: https://a.co/d/7auf7Qe
+- RGB LED Module for Arduino, ESP32, ESP8266, Raspberry Pi, 10 Pieces
+- Link: https://a.co/d/4fR2OXq
 - SIM&NAT 8inch / 20cm Wire Ribbon Cables kit for Arduino Raspberry Pi 2/3
 - Link: https://a.co/d/fxIIGYs
 
