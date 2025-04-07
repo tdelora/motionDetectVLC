@@ -1,24 +1,22 @@
 #!/usr/bin/env python
 
 from gpiozero import MotionSensor
-import os
 from pathlib import Path
 from signal import pause
-import sys
-import threading
-import time
-import vlc
-import yaml
+import os, sys, threading, time, vlc, yaml
+import mdvUtils
+from mdvLED import ledStatusClass
 
-#OS environment setup
-osEnvironment = ""
+
+#OS environment setup 
+osEnvironment = {}
 
 # Initial VLC setup: Create VLC instance and player
 vlcInstance = vlc.Instance()
 vlcPlayer = vlcInstance.media_player_new()
 
 # Other VLC related variables
-vlcFullscreen = False
+vlcFullscreen = True
 
 # Motion sensor setup
 motionSensorPin = 12
@@ -43,22 +41,11 @@ timeUntilBored = 180
 currentBoredVideo = 0
 boredVideoList = ""
 
+# Optionally an LED can be utilized to indicate the current execution status
+ledStatus = ledStatusClass()
+showLEDStatus = False
+
 try:
-
-	#
-	# Function findKey looks for a key/value pair in a data string
-	#
-
-	def findKey(data,key):
-		if key in data.keys():
-			# print(len(data[key]))
-			# print(data[key])
-			return data[key]
-		else:
-			# print(f"Key {key} not found")
-			return None
-
-
 	#
 	# Function loadVerifyConfig reads the configuration yaml
 	#  - Verifies the specified file exists before reading it
@@ -76,6 +63,8 @@ try:
 		global boredVideoList
 		global vlcFullscreen
 		global motionSensorPin
+		global ledStatus
+		global showLEDStatus
 		returnValue = True
 
 		fileCheck = Path(configFile)
@@ -86,14 +75,14 @@ try:
 			# Verify user provided configuration
 
 			# Verify startingVideo (Manditory)
-			startingVideo = findKey(data,"starting-video")
+			startingVideo = mdvUtils.findKey(data,"starting-video")
 			fileCheck = Path(startingVideo)
 			if fileCheck.exists() == False:
 				print(f"Starting video {startingVideo} does not exist")
 				returnValue = False
 
 			# Verify motionVideoList (Manditory)
-			motionVideoList = findKey(data,"motion-videos")
+			motionVideoList = mdvUtils.findKey(data,"motion-videos")
 			if type(motionVideoList) is list:
 				currentFile = 0
 				while currentFile < len(motionVideoList):
@@ -113,7 +102,7 @@ try:
 				returnValue = False
 
 			# Verify noMotionVideo (Optional)
-			noMotionVideo = findKey(data,"no-motion-video")
+			noMotionVideo = mdvUtils.findKey(data,"no-motion-video")
 			if noMotionVideo != None:
 				fileCheck = Path(noMotionVideo)
 				if fileCheck.exists() == False:
@@ -122,7 +111,7 @@ try:
 					noMotionVideo = ""
 
 			# Verify boredVideoList (Optional)
-			boredVideoList = findKey(data,"bored-videos")
+			boredVideoList = mdvUtils.findKey(data,"bored-videos")
 			if boredVideoList != None:
 				if type(boredVideoList) is list:
 					currentFile = 0
@@ -143,7 +132,7 @@ try:
 					returnValue = False
 
 			# The bored timer has a default of 180 seconds, check if an updated value has been provided.
-			tempTime = findKey(data,"bored-time")
+			tempTime = mdvUtils.findKey(data,"bored-time")
 			if tempTime != None:
 				if type(tempTime) is int:
 					timeUntilBored = tempTime
@@ -152,28 +141,33 @@ try:
 					returnValue = False
 
 			# vlcFullscreen has a default value of True, check if an updated value has been provided.
-			vlcFullscreenTmp = findKey(data,"vlc-fullscreen")
-			if type(vlcFullscreenTmp) is bool:
-				vlcFullscreen = vlcFullscreenTmp
+			boolTmp = mdvUtils.findKey(data,"vlc-fullscreen")
+			if type(boolTmp) is bool:
+				vlcFullscreen = boolTmp
 			else:
 				print(f"vlc-fullscreen specified in {configFile} is not a bool")
 
-			# Set motionSensorPin (Optional, Defaulted to pin 12)
-			motionSensorPinTmp = findKey(data,"motion-sensor-pin")
+			# Set motionSensorPin (Optional, Defaulted to pin 12, and will be none if no key/value pair is present)
+			motionSensorPinTmp = mdvUtils.findKey(data,"motion-sensor-pin")
 			if motionSensorPinTmp != None:
-				if type(motionSensorPinTmp) is int:
-					if motionSensorPinTmp >= 2 and motionSensorPinTmp <= 27:
-						# A valid Raspberry Pi GPIO pin
-						motionSensorPin = motionSensorPinTmp
-					else:
-						print(f"motion-sensor-pin specified as {motionSensorPinTmp} in {configFile} is out of range (2 to 27)")
-						returnValue = False
+				if mdvUtils.validateGPIOPin("motion-sensor-pin",motionSensorPinTmp):
+					motionSensorPin = motionSensorPinTmp
 				else:
-					print(f"motion-sensor-pin specified in {configFile} is not an int")
+					# motion-sensor-pin was not valid for some reason.
 					returnValue = False
 
+			# showLEDStatus has a default value of False, check if an updated value has been provided.
+			boolTmp = mdvUtils.findKey(data,"led-status")
+			if type(boolTmp) is bool:
+				showLEDStatus = boolTmp
+			else:
+				print(f"led-status specified in {configFile} is not a bool")
+
+			# New LED configuraions (pin numbers, status colors) may have been provided
+			returnValue = ledStatus.configure(mdvUtils.findKey(data,"led-config"))
+
 			# Load optional environment settings. This will be checked/used in main()
-			osEnvironment = findKey(data,"os-environment")
+			osEnvironment = mdvUtils.findKey(data,"os-environment")
 		else:
 			print(f"{configFile} does not exist")
 			returnValue = False
@@ -189,7 +183,7 @@ try:
 	#   - Logs an error if videoFile does not exist.
 	#
 
-	def playVideo(videoFile):
+	def playVideo(videoFile,colorHexString):
 		videoCheck = Path(videoFile)
 		returnValue = True
 
@@ -198,10 +192,12 @@ try:
 				print(f"Playing {videoFile}")
 				media = vlcInstance.media_new_path(videoFile)
 				vlcPlayer.set_media(media)
+				ledStatus.setColor(colorHexString)
 				vlcPlayer.play()
 				time.sleep(3)
 				while vlcPlayer.is_playing():
 					time.sleep(1)
+				ledStatus.setColor(ledStatusClass.statusModes['waiting'])
 			else:
 				print()
 				print("A video is currently playing")
@@ -231,7 +227,7 @@ try:
 		print()
 		print(f"Motion {triggers} detected...")
 
-		playVideo(motionVideoList[currentMotionVideo])
+		playVideo(motionVideoList[currentMotionVideo],ledStatusClass.statusModes['motion'])
 
 		currentMotionVideo += 1
 		if currentMotionVideo == len(motionVideoList):
@@ -248,7 +244,7 @@ try:
 		print()
 		print("No motion...")
 		if noMotionVideo != None and len(noMotionVideo):
-			playVideo(noMotionVideo)
+			playVideo(noMotionVideo,ledStatusClass.statusModes['no_motion'])
 		print("No motion detected complete")
 
 
@@ -280,7 +276,7 @@ try:
 
 		print()
 		print("I'm bored...")
-		playVideo(boredVideoList[currentBoredVideo])
+		playVideo(boredVideoList[currentBoredVideo],ledStatusClass.statusModes['bored'])
 		currentBoredVideo += 1
 		if currentBoredVideo == len(boredVideoList):
 			currentBoredVideo = 0
@@ -316,6 +312,9 @@ try:
 					for key,value in osEnvironment.items():
 						os.environ[key] = value
 
+				ledStatus.start(showLEDStatus)
+				ledStatus.setColor(ledStatusClass.statusModes['start'])
+
 				vlcPlayer.set_fullscreen(vlcFullscreen)
 
 				pir = MotionSensor(motionSensorPin)
@@ -325,7 +324,7 @@ try:
 				print()
 
 				setBoredTimer()
-				playVideo(startingVideo)
+				playVideo(startingVideo,ledStatusClass.statusModes['start'])
 
 				pause()
 		else:
@@ -338,5 +337,7 @@ try:
 
 finally:
 	# Future features
+
+	ledStatus.stop()
 	print()
 	print("Closing down")

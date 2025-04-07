@@ -5,7 +5,8 @@
 os-environment:
   QT_QPA_PLATFORM: wayland
 
-vlc-fullscreen: false  # Set VLC to be full screen
+vlc-fullscreen: False  # Set VLC to be full screen
+led-status: False # Use LED to indicate status
 starting-video: /home/pi/animations/startinVideo.mp4  # Video to run when the script starts, manditory
 no-motion-video: /home/pi/animations/noMotionVideo.mp4  # Video to run when a no motion even occurs
 motion-sensor-pin: 12  #GPIO pin to use for motion detection. Optional, default is pin 12
@@ -22,3 +23,15 @@ bored-time: 240  # Bored timer duration
 bored-videos:
   - /home/pi/animations/boredVideo1.mov
   - /home/pi/animations/boredVideo2.mp4
+
+# Optional settings for the GPIO Pins and colors if a status LED is attached.
+# If an update is required you only need to supply the key/value pairs that need updating,
+# the unsupplied key/values will remain the program default(s) the values of which are below.
+led-config:
+  gpioPins: {'redPin':13,'greenPin':6,'bluePin':18}
+  statusModes: {'start':"#FF0000",'bored':"#0000F0",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
+
+# Optional led-status contols if the led status light system is enabled
+# True: enables
+# False: disables
+led-status: True
