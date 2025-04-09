@@ -2,9 +2,7 @@
 import string
 
 
-#
 # Function findKey looks for a key/value pair in a data string
-#
 
 def findKey(data,key):
 	if key in data.keys():
@@ -14,6 +12,14 @@ def findKey(data,key):
 	else:
 		# print(f"Key {key} not found")
 		return None
+
+
+"""
+Function dictionaryUpdate iterates through an destination dictionary for like keys present in
+an update dictionary calling a validation fuction before adding. If either updateDict or updateDict
+args are not dictonaries or updateDict is type None (indicating there are no updates to do) argument
+destDict is returned unchanged.
+"""
 
 def dictionaryUpdate(updateDict,destDict,validateFunc):
 	returnValue = True
@@ -49,6 +55,11 @@ def dictionaryUpdate(updateDict,destDict,validateFunc):
 	return returnValue, tmpDict
 
 
+"""
+Function validateGPIOPin verifies argument pinNum is an int and in the proper range (2-27) for
+Raspberry Pi GPIO pins.
+"""
+
 def validateGPIOPin(pinSpec,pinNum):
 	returnValue = False
 	if pinNum != None:
@@ -64,6 +75,11 @@ def validateGPIOPin(pinSpec,pinNum):
 	return returnValue
 
 
+"""
+Function validateHexColor verifies argument hexString is in the proper hex triplet starting with a
+hashtag. Examples: #00FF00, #F9D00FF, #301934
+"""
+
 def validateHexColor(mode,hexString):
 	returnValue = False
 	if type(hexString) is str and len(hexString) == 7:
@@ -75,6 +91,11 @@ def validateHexColor(mode,hexString):
 
 	return returnValue
 
+
+"""
+Function colorHexTo8bit takes a hex triplet string and converts it to its equal 8 bit specifications.
+Example: #301934 -> R: 48 G: 25 B: 52
+"""
 
 def colorHexTo8bit(hexString):
 	redVal = 0

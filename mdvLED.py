@@ -11,6 +11,10 @@ import RPi.GPIO as GPIO
 from time import sleep
 import mdvUtils
 
+"""
+Class ledStatusClass is a GPIO LED pin controller class.
+"""
+
 class ledStatusClass:
 
 	gpioPins = {'redPin':13,'greenPin':6,'bluePin':18}
