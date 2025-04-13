@@ -15,10 +15,11 @@ def findKey(data,key):
 
 
 """
-Function dictionaryUpdate iterates through an destination dictionary for like keys present in
-an update dictionary calling a validation fuction before adding. If either updateDict or updateDict
-args are not dictonaries or updateDict is type None (indicating there are no updates to do) argument
-destDict is returned unchanged.
+Function dictionaryUpdate iterates through an updateDict and looks for for like keys present in
+destDict calling a validation fuction before adding. Optionally any key/value
+pair in destDict that is not present in destDict can be validated and added to the destDict.
+If either updateDict or updateDict args are not dictonaries or updateDict is type None
+(indicating there are no updates to do) argument destDict is returned unchanged.
 """
 
 def dictionaryUpdate(updateDict,destDict,addUnknown,validateFunc):
