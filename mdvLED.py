@@ -37,11 +37,12 @@ class ledStatusClass:
 
 	def configure(self,ledConfig):
 		returnValue = True
+		addUnknown = False
 
 		if type(ledConfig) is dict:
 			# Check each dictionary seperately so all issues will be displayed at once vs one at a time
-			pinReturnValue, self.gpioPins = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"gpioPins"),self.gpioPins,mdvUtils.validateGPIOPin)
-			modeReturnValue, self.statusModes = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"statusModes"),self.statusModes,mdvUtils.validateHexColor)
+			pinReturnValue, self.gpioPins = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"gpioPins"),self.gpioPins,addUnknown,mdvUtils.validateGPIOPin)
+			modeReturnValue, self.statusModes = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"statusModes"),self.statusModes,addUnknown,mdvUtils.validateHexColor)
 			if pinReturnValue != True or modeReturnValue != True:
 				# One of the dictionaries had an issue
 				returnValue = False

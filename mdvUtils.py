@@ -21,16 +21,16 @@ args are not dictonaries or updateDict is type None (indicating there are no upd
 destDict is returned unchanged.
 """
 
-def dictionaryUpdate(updateDict,destDict,validateFunc):
+def dictionaryUpdate(updateDict,destDict,addUnknown,validateFunc):
 	returnValue = True
 	tmpDict = destDict
 
 	if type(destDict) is dict:
 		updateType = type(updateDict)
 		if updateType is dict:
-			for key in tmpDict.keys():
-				value = findKey(updateDict,key)
-				if value != None:
+			for key, value in updateDict.items():
+				if key in destDict or addUnknown:
+					# Key exists or we should add an unknown key
 					if validateFunc != None:
 						# Check each potential change, if any come back false change returnValue to False
 						# Doing it this way reveals all issues in the dictionary
@@ -42,10 +42,11 @@ def dictionaryUpdate(updateDict,destDict,validateFunc):
 							# We encountered an issue
 							returnValue = False
 					else:
-						print(f"mdvUtils.dictionaryUpdate: Updating {key} without validating")
+						print(f"mdvUtils.dictionaryUpdate: Adding/pdating {key} without validating")
 						tmpDict[key] = value
 						returnValue = False
 		elif updateType is not type(None):
+			# An updateType of none means there is nothing to do, any other type that is not dict or none is incorrect.
 			print(f"mdvUtils.dictionaryUpdate: item received to read for updates is " + str(updateType) + " not a dictionary")
 			returnValue = False
 	else:
@@ -68,9 +69,9 @@ def validateGPIOPin(pinSpec,pinNum):
 				# A valid Raspberry Pi GPIO pin
 				returnValue = True
 			else:
-				print(f"{pinSpec} specified as {pinNum} is out of range (2 to 27)")
+				print(f"mdvUtils.validateGPIOPin: {pinSpec} specified as {pinNum} is out of range (2 to 27)")
 		else:
-			print(f"GPIO pis specification {pinSpec} is not an int")
+			print(f"mdvUtils.validateGPIOPin: GPIO pin specification {pinSpec} is not an int")
 
 	return returnValue
 
