@@ -20,12 +20,21 @@ class ledStatusClass:
 	gpioPins = {'redPin':13,'greenPin':6,'bluePin':18}
 	statusModes = {'start':"#FF0000",'bored':"#0000FF",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
 	
+	# Function __init__ is the initializer for this class.
+
 	def __init__(self):
 		self.showLED = False
 		GPIO.setmode(GPIO.BCM)
 
+
+	# Function _duty sets the RGB values for the LED. This code came from newbiely.com. Again, thank you.
+
 	def _duty(self,x, in_min, in_max, out_min, out_max):
     		return int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+
+
+	# Function setColor receives a hex color string, has it converted to 8-bit color specification
+	# and calls _duty() to set the LED color.
 
 	def setColor(self,hexString):
 		if self.showLED:
@@ -34,6 +43,12 @@ class ledStatusClass:
 			self.RED.ChangeDutyCycle(self._duty(redVal, 0, 255, 0, 100))
 			self.GREEN.ChangeDutyCycle(self._duty(greenVal, 0, 255, 0, 100))
 			self.BLUE.ChangeDutyCycle(self._duty(blueVal, 0, 255, 0, 100))
+
+
+	# Function configure receives dictionary ledConfig and updates class ledStatusClass dictionaries
+	# gpioPins and statusModes as needed.
+	# Note: mdvUtils.mdvUtils.dictionaryUpdate() optionally can add new values to a receive destionation
+	# dictionary, this function is not taking advantage of that. Yet.
 
 	def configure(self,ledConfig):
 		returnValue = True
@@ -58,6 +73,9 @@ class ledStatusClass:
 
 		return returnValue
 
+
+	# Function start sets up the GPIO configuration specified in dictionary gpioPins and calls start if bool showLED is set to true.
+
 	def start(self,showLED):
 		self.showLED = showLED
 
@@ -70,6 +88,9 @@ class ledStatusClass:
 			self.RED.start(0)
 			self.GREEN.start(0)
 			self.BLUE.start(0)
+
+
+	# Function stop calls stop for the specified GPIO.PWM pins  if bool showLED is set to true.
 
 	def stop(self):
 		if self.showLED:
