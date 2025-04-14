@@ -29,7 +29,7 @@ bored-videos:
 # the unsupplied key/values will remain the program default(s) the values of which are below.
 led-config:
   gpioPins: {'redPin':13,'greenPin':6,'bluePin':18}
-  statusModes: {'start':"#FF0000",'bored':"#0000F0",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
+  statusModes: {'start':"#FF0000",'bored':"#0000FF",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
 
 # Optional led-status contols if the led status light system is enabled
 # True: enables
