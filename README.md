@@ -1,5 +1,7 @@
 # motionDetectVLC
-Python script for Raspberry Pi which detects motion and plays videos when triggered.  The script reads a yaml file for mandatory and optional parameters (See config.yml), plays an optional startup video then waits for motion and no-motion events to play specified videos. Optionally the script plays "bored" videos at a specified interval. In all cases, once a video is started it will be played to completion, subsequent events of any type will not interrupt a video in progress.
+Python script for Raspberry Pi which detects motion and plays videos when triggered.  The script reads a yaml file for mandatory and optional parameters (See config.yml), plays an optional startup video, and then waits for motion and no-motion events to play specified videos. Optionally the script plays "bored" videos at a specified interval. In all cases, once a video is started it will be played to completion, subsequent events of any type will not interrupt a video in progress.
+
+Optionally the current script status can be displayed on an attached LED, there are default GPIO pin and status color settings, which can be changed in the yaml file to the user-desired specifications.
 
 Mandatory yaml Parameters:
 - starting-video (string): Video to be played when script starts.
@@ -12,6 +14,20 @@ Optional yaml Parameters:
 - motion-sensor-pin (int): The GPIO pin to be read for motion events. If motion-sensor-pin is not specified the script reads from pin 12.
 - vlc-fullscreen (boolean): Specifies if VLC should be run in full-screen mode. If vlc-fullscreen is not specified the script defaults to false.
 - os-environment (dictionary): OS environment variables to be set as the script starts.
+
+Optional LED Parameters:
+- led-status (boolean): Enable the LED status operations
+- led-config (dictionary): Dictionary of dictionaries for LED GPIO pins and status color settings. Not all dictionaries or dictionary entries are needed, if a setting is not specified the default values are utilized. Member dictionaries and their parameters:
+    - gpioPins (dictionary): GPIO pins to be used for LED operations.
+      - redPin (int): Pin for red. Default: 13
+      - greenPin (int): Pin for green. Default: 6
+      - bluePin (int): Pin for blue. Default: 18
+    - statusModes (dictionary): LED colors for the various script status modes. Modes are:
+      - start (string): Color displayed in the startup phase. Default: #FF0000 (red)
+      - bored (string): Color displayed when bored videos are playing. Default: #0000FF (blue)
+      - no_motion (string): Color displayed when a no-motion event occurs. Default: #ff8000 (orange)
+      - motion (string): Color displayed when a motion event occurs. Default: #301934 (dark purple)
+      - waiting (string): Color displayed between events or timer firings. Default: #00FF00 (green)
 
 Hardware utilized
 - iRasptek Starter Kit for Raspberry Pi 5 RAM 8GB - 64GB Edition of OS-Bookworm Pre-Loaded (Amazon)
