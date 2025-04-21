@@ -163,8 +163,8 @@ try:
 			else:
 				print(f"led-status specified in {configFile} is not a bool")
 
-			# New LED configuraions (pin numbers, status colors) may have been provided
-			returnValue = gpioCtrl.configure(mdvUtils.findKey(data,"led-config"))
+			# New GPIO configuraions (pin numbers, status colors) may have been provided
+			returnValue = gpioCtrl.configure(mdvUtils.findKey(data,"gpio-config"))
 
 			# Load optional environment settings. This will be checked/used in main()
 			osEnvironment = mdvUtils.findKey(data,"os-environment")

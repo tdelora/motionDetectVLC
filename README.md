@@ -17,12 +17,12 @@ Optional yaml Parameters:
 
 Optional LED Parameters:
 - led-status (boolean): Enable the LED status operations
-- led-config (dictionary): Dictionary of dictionaries for LED GPIO pins and status color settings. Not all dictionaries or dictionary entries are needed, if a setting is not specified the default values are utilized. Member dictionaries and their parameters:
+- gpio-config (dictionary): Dictionary of dictionaries for LED GPIO pins and status color settings. Not all dictionaries or dictionary entries are needed, if a setting is not specified the default values are utilized. Member dictionaries and their parameters:
     - gpioPins (dictionary): GPIO pins to be used for LED operations.
       - redPin (int): Pin for red. Default: 13
       - greenPin (int): Pin for green. Default: 6
       - bluePin (int): Pin for blue. Default: 18
-    - statusModes (dictionary): LED colors for the various script status modes. Modes are:
+    - ledStatusColors (dictionary): LED colors for the various script status modes. Modes are:
       - start (string): Color displayed in the startup phase. Default: #FF0000 (red)
       - bored (string): Color displayed when bored videos are playing. Default: #0000FF (blue)
       - no_motion (string): Color displayed when a no-motion event occurs. Default: #ff8000 (orange)
