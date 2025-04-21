@@ -5,7 +5,7 @@ from pathlib import Path
 from signal import pause
 import os, sys, threading, time, vlc, yaml
 import mdvUtils
-from mdvLED import ledStatusClass
+from mdvLED import gpioCtrlClass
 
 
 #OS environment setup 
@@ -42,7 +42,7 @@ currentBoredVideo = 0
 boredVideoList = ""
 
 # Optionally an LED can be utilized to indicate the current execution status
-ledStatus = ledStatusClass()
+gpioCtrl = gpioCtrlClass()
 showLEDStatus = False
 
 try:
@@ -63,7 +63,7 @@ try:
 		global boredVideoList
 		global vlcFullscreen
 		global motionSensorPin
-		global ledStatus
+		global gpioCtrl
 		global showLEDStatus
 		returnValue = True
 
@@ -164,7 +164,7 @@ try:
 				print(f"led-status specified in {configFile} is not a bool")
 
 			# New LED configuraions (pin numbers, status colors) may have been provided
-			returnValue = ledStatus.configure(mdvUtils.findKey(data,"led-config"))
+			returnValue = gpioCtrl.configure(mdvUtils.findKey(data,"led-config"))
 
 			# Load optional environment settings. This will be checked/used in main()
 			osEnvironment = mdvUtils.findKey(data,"os-environment")
@@ -192,12 +192,12 @@ try:
 				print(f"Playing {videoFile}")
 				media = vlcInstance.media_new_path(videoFile)
 				vlcPlayer.set_media(media)
-				ledStatus.setColor(colorHexString)
+				gpioCtrl.setColor(colorHexString)
 				vlcPlayer.play()
 				time.sleep(3)
 				while vlcPlayer.is_playing():
 					time.sleep(1)
-				ledStatus.setColor(ledStatusClass.statusModes['waiting'])
+				gpioCtrl.setColor(gpioCtrlClass.ledStatusColors['waiting'])
 			else:
 				print()
 				print("A video is currently playing")
@@ -227,7 +227,7 @@ try:
 		print()
 		print(f"Motion {triggers} detected...")
 
-		playVideo(motionVideoList[currentMotionVideo],ledStatusClass.statusModes['motion'])
+		playVideo(motionVideoList[currentMotionVideo],gpioCtrlClass.ledStatusColors['motion'])
 
 		currentMotionVideo += 1
 		if currentMotionVideo == len(motionVideoList):
@@ -244,7 +244,7 @@ try:
 		print()
 		print("No motion...")
 		if noMotionVideo != None and len(noMotionVideo):
-			playVideo(noMotionVideo,ledStatusClass.statusModes['no_motion'])
+			playVideo(noMotionVideo,gpioCtrlClass.ledStatusColors['no_motion'])
 		print("No motion detected complete")
 
 
@@ -276,7 +276,7 @@ try:
 
 		print()
 		print("I'm bored...")
-		playVideo(boredVideoList[currentBoredVideo],ledStatusClass.statusModes['bored'])
+		playVideo(boredVideoList[currentBoredVideo],gpioCtrlClass.ledStatusColors['bored'])
 		currentBoredVideo += 1
 		if currentBoredVideo == len(boredVideoList):
 			currentBoredVideo = 0
@@ -312,8 +312,8 @@ try:
 					for key,value in osEnvironment.items():
 						os.environ[key] = value
 
-				ledStatus.start(showLEDStatus)
-				ledStatus.setColor(ledStatusClass.statusModes['start'])
+				gpioCtrl.start(showLEDStatus)
+				gpioCtrl.setColor(gpioCtrlClass.ledStatusColors['start'])
 
 				vlcPlayer.set_fullscreen(vlcFullscreen)
 
@@ -324,7 +324,7 @@ try:
 				print()
 
 				setBoredTimer()
-				playVideo(startingVideo,ledStatusClass.statusModes['start'])
+				playVideo(startingVideo,gpioCtrlClass.ledStatusColors['start'])
 
 				pause()
 		else:
@@ -338,6 +338,6 @@ try:
 finally:
 	# Future features
 
-	ledStatus.stop()
+	gpioCtrl.stop()
 	print()
 	print("Closing down")

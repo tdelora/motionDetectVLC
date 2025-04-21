@@ -12,13 +12,13 @@ from time import sleep
 import mdvUtils
 
 """
-Class ledStatusClass is a GPIO LED pin controller class.
+Class gpioCtrlClass is a GPIO pin controller class.
 """
 
-class ledStatusClass:
+class gpioCtrlClass:
 
 	gpioPins = {'redPin':13,'greenPin':6,'bluePin':18}
-	statusModes = {'start':"#FF0000",'bored':"#0000FF",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
+	ledStatusColors = {'start':"#FF0000",'bored':"#0000FF",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
 	
 	# Function __init__ is the initializer for this class.
 
@@ -45,8 +45,8 @@ class ledStatusClass:
 			self.BLUE.ChangeDutyCycle(self._duty(blueVal, 0, 255, 0, 100))
 
 
-	# Function configure receives dictionary ledConfig and updates class ledStatusClass dictionaries
-	# gpioPins and statusModes as needed.
+	# Function configure receives dictionary ledConfig and updates class gpioCtrlClass dictionaries
+	# gpioPins and ledStatusColors as needed.
 	# Note: mdvUtils.mdvUtils.dictionaryUpdate() optionally can add new values to a receive destionation
 	# dictionary, this function is not taking advantage of that. Yet.
 
@@ -57,7 +57,7 @@ class ledStatusClass:
 		if type(ledConfig) is dict:
 			# Check each dictionary seperately so all issues will be displayed at once vs one at a time
 			pinReturnValue, self.gpioPins = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"gpioPins"),self.gpioPins,addUnknown,mdvUtils.validateGPIOPin)
-			modeReturnValue, self.statusModes = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"statusModes"),self.statusModes,addUnknown,mdvUtils.validateHexColor)
+			modeReturnValue, self.ledStatusColors = mdvUtils.dictionaryUpdate(mdvUtils.findKey(ledConfig,"ledStatusColors"),self.ledStatusColors,addUnknown,mdvUtils.validateHexColor)
 			if pinReturnValue != True or modeReturnValue != True:
 				# One of the dictionaries had an issue
 				returnValue = False
@@ -66,7 +66,7 @@ class ledStatusClass:
 			returnValue = False
 
 		# print(f"gpioPins: {self.gpioPins}")
-		# print (f"statusModes: {self.statusModes}")
+		# print (f"ledStatusColors: {self.ledStatusColors}")
 		# print(f"pinReturnValue: {pinReturnValue}")
 		# print(f"modeReturnValue: {modeReturnValue}")
 		# print(f"returnValue: {returnValue}")
