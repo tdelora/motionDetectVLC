@@ -5,7 +5,7 @@ from pathlib import Path
 from signal import pause
 import os, sys, threading, time, vlc, yaml
 import mdvUtils
-from mdvLED import gpioCtrlClass
+from mdvGPIOCtrl import gpioCtrlClass
 
 
 #OS environment setup 
