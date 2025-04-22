@@ -2,7 +2,7 @@
 
 from gpiozero import MotionSensor
 from pathlib import Path
-from signal import pause
+import signal
 import os, sys, threading, time, vlc, yaml
 import mdvUtils
 from mdvGPIOCtrl import gpioCtrlClass
@@ -176,6 +176,44 @@ try:
 
 
 	#
+	# Function toggleVLCFullscreen flips boolean vlcFullscreen and sets vlcPlayer.set_fullscreen to the current setting.
+	#
+
+	def toggleVLCFullscreen():
+		global vlcPlayer
+		global vlcFullscreen
+
+		if vlcFullscreen == True:
+			vlcFullscreen = False
+		else:
+			vlcFullscreen = True
+
+		vlcPlayer.set_fullscreen(vlcFullscreen)
+
+	#
+	# Function proccessButtonEvent handles button events depending on the received press duration.
+	#
+
+	def proccessButtonEvent(duration):
+		# print(f"proccessButtonEvent: {duration:.2f}")
+
+		# If a button press is less than 5 seconds, we should toggle VLC full screen,
+		# if it is more than 5 seconds we should trigger the script to exit.
+
+		if duration < 5.0:
+			# Toggle VLC full screen.
+			toggleVLCFullscreen()
+		else:
+			# Trigger an OS exit or the like
+			# A bit of as hack here, the preferable method to trigger an exit at this point would be to have set up a signal handler and
+			# and signal the main thread to exit. However I have found that signal handlers (in Python on a Raspberry Pi) interfere with
+			# GPIO ops thus redering the LED inoperatable. I like the LED so... More reseach to do.
+			print()
+			print("Exiting...")
+			gpioCtrl.stop()
+			os.kill(os.getpid(), signal.SIGTERM)
+
+	#
 	# Function playVideo checks for the existence of a file videoFile, plays it if it exists
 	#   - Checks for videoFile, plays it if it exists
 	#   - Waits 3 seconds as the video starts
@@ -312,7 +350,7 @@ try:
 					for key,value in osEnvironment.items():
 						os.environ[key] = value
 
-				gpioCtrl.start(showLEDStatus)
+				gpioCtrl.start(showLEDStatus,proccessButtonEvent)
 				gpioCtrl.setColor(gpioCtrlClass.ledStatusColors['start'])
 
 				vlcPlayer.set_fullscreen(vlcFullscreen)
@@ -326,7 +364,7 @@ try:
 				setBoredTimer()
 				playVideo(startingVideo,gpioCtrlClass.ledStatusColors['start'])
 
-				pause()
+				signal.pause()
 		else:
 			print()
 			print("Please provide a config yaml file")
@@ -336,8 +374,6 @@ try:
 		main()
 
 finally:
-	# Future features
-
 	gpioCtrl.stop()
 	print()
 	print("Closing down")

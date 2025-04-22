@@ -1,7 +1,11 @@
 # motionDetectVLC
 Python script for Raspberry Pi which detects motion and plays videos when triggered.  The script reads a yaml file for mandatory and optional parameters (See config.yml), plays an optional startup video, and then waits for motion and no-motion events to play specified videos. Optionally the script plays "bored" videos at a specified interval. In all cases, once a video is started it will be played to completion, subsequent events of any type will not interrupt a video in progress.
 
-Optionally the current script status can be displayed on an attached LED, there are default GPIO pin and status color settings, which can be changed in the yaml file to the user-desired specifications.
+Optional Functionality:
+- The current script status can be displayed on an attached LED, there are default GPIO pin and status color settings, which can be changed in the yaml file to the user-desired specifications.
+- A button can be utilized to control some operations:
+  - A press of less than 5 seconds will toggle the VLC player in and out of full screen mode.
+  - A press of more than 5 seconds will trigger the script to exit.
 
 Mandatory yaml Parameters:
 - starting-video (string): Video to be played when script starts.
@@ -15,13 +19,14 @@ Optional yaml Parameters:
 - vlc-fullscreen (boolean): Specifies if VLC should be run in full-screen mode. If vlc-fullscreen is not specified the script defaults to false.
 - os-environment (dictionary): OS environment variables to be set as the script starts.
 
-Optional LED Parameters:
+Optional GPIO Parameters:
 - led-status (boolean): Enable the LED status operations
-- gpio-config (dictionary): Dictionary of dictionaries for LED GPIO pins and status color settings. Not all dictionaries or dictionary entries are needed, if a setting is not specified the default values are utilized. Member dictionaries and their parameters:
-    - gpioPins (dictionary): GPIO pins to be used for LED operations.
+- gpio-config (dictionary): Dictionary of dictionaries for GPIO pins and LED status color settings. Not all dictionaries or dictionary entries are needed, if a setting is not specified the default values are utilized. Member dictionaries and their parameters:
+    - gpioPins (dictionary): GPIO pins to be used for LED and button operations.
       - redPin (int): Pin for red. Default: 13
       - greenPin (int): Pin for green. Default: 6
       - bluePin (int): Pin for blue. Default: 18
+      - buttonPin (int): Pin for the button signal. Default: 16
     - ledStatusColors (dictionary): LED colors for the various script status modes. Modes are:
       - start (string): Color displayed in the startup phase. Default: #FF0000 (red)
       - bored (string): Color displayed when bored videos are playing. Default: #0000FF (blue)
@@ -31,13 +36,15 @@ Optional LED Parameters:
 
 Hardware utilized
 - iRasptek Starter Kit for Raspberry Pi 5 RAM 8GB - 64GB Edition of OS-Bookworm Pre-Loaded (Amazon)
-- Link: https://a.co/d/0X1S8th
+  - Link: https://a.co/d/0X1S8th
 - HiLetgo 3pcs HC-SR501 PIR Infrared Sensor Human Body Infrared Motion Module for Arduino Raspberry Pi (Amazon)
-- Link: https://a.co/d/7auf7Qe
+  - Link: https://a.co/d/7auf7Qe
 - RGB LED Module for Arduino, ESP32, ESP8266, Raspberry Pi, 10 Pieces
-- Link: https://a.co/d/4fR2OXq
+  - Link: https://a.co/d/4fR2OXq
+- WWZMDiB 6Pcs TTP223B Digital Capacitive Touch Sensor Switch
+  - https://a.co/d/4RpuDDr
 - SIM&NAT 8inch / 20cm Wire Ribbon Cables kit for Arduino Raspberry Pi 2/3
-- Link: https://a.co/d/fxIIGYs
+  - Link: https://a.co/d/fxIIGYs
 
 Other Notes:
 - Originally written as part of a Halloween jumpscare gag, it has been cleaned up for genetic use.
