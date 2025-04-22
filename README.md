@@ -34,10 +34,10 @@ Optional GPIO Parameters:
       - motion (string): Color displayed when a motion event occurs. Default: #301934 (dark purple)
       - waiting (string): Color displayed between events or timer firings. Default: #00FF00 (green)
 
-Hardware utilized
-- iRasptek Starter Kit for Raspberry Pi 5 RAM 8GB - 64GB Edition of OS-Bookworm Pre-Loaded (Amazon)
+Hardware utilized (Ordered from Amazon):
+- iRasptek Starter Kit for Raspberry Pi 5 RAM 8GB - 64GB Edition of OS-Bookworm Pre-Loaded
   - Link: https://a.co/d/0X1S8th
-- HiLetgo 3pcs HC-SR501 PIR Infrared Sensor Human Body Infrared Motion Module for Arduino Raspberry Pi (Amazon)
+- HiLetgo 3pcs HC-SR501 PIR Infrared Sensor Human Body Infrared Motion Module for Arduino Raspberry Pi
   - Link: https://a.co/d/7auf7Qe
 - RGB LED Module for Arduino, ESP32, ESP8266, Raspberry Pi, 10 Pieces
   - Link: https://a.co/d/4fR2OXq
