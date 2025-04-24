@@ -150,17 +150,19 @@ class gpioCtrlClass:
 			print(f"gpioCtrlClass.start: Received noMotionCallable is uncallable type " + type(userButtonCallable))
 			returnValue = False
 
-		if callable(userButtonCallable) != True:
+		if self.buttonOps and userButtonCallable != None and callable(userButtonCallable) != True:
 			print(f"gpioCtrlClass.start: Received userButtonCallable is uncallable type " + type(userButtonCallable))
 			returnValue = False
 
-		# If returnValue is True then we are good to start
+		# If returnValue is True at this point then we are good to start
 		if returnValue:
+			# Set up PIR motion detection
 			self.pirSensor = MotionSensor(self.gpioPins["motionPin"])
 			self.pirSensor.when_motion = motionCallable
 			self.pirSensor.when_no_motion = noMotionCallable
 
 			if self.showLED:
+				# Set up for LED status ops.
 				GPIO.setup([self.gpioPins["redPin"], self.gpioPins["greenPin"],self.gpioPins["bluePin"]],GPIO.OUT)
 				self.RED = GPIO.PWM(int(self.gpioPins["redPin"]), 1000)
 				self.GREEN = GPIO.PWM(int(self.gpioPins["greenPin"]), 1000)
@@ -171,16 +173,10 @@ class gpioCtrlClass:
 				self.BLUE.start(0)
 
 			if self.buttonOps:
-				if userButtonCallable != None:
-					# The user has passed us somthing usable
-					if callable(userButtonCallable):
-						# ... and it is a function. Set buttonCallable to point to userButtonCallable
-						# and set up for button ops.
-						self.buttonCallable = userButtonCallable
-						GPIO.setup(self.gpioPins["buttonPin"], GPIO.IN)
-						GPIO.add_event_detect(self.gpioPins["buttonPin"],GPIO.BOTH,callback=self.buttonEvent)
-					else:
-						print(f"gpioCtrlClass.start: userButtonCallable is uncallable type " + type(userButtonCallable) + ", button ops disabled.")
+				# Set up for button ops.
+				self.buttonCallable = userButtonCallable
+				GPIO.setup(self.gpioPins["buttonPin"], GPIO.IN)
+				GPIO.add_event_detect(self.gpioPins["buttonPin"],GPIO.BOTH,callback=self.buttonEvent)
 
 			# Finally set the LED color to the start color
 			self.setColor(self.ledStatusColors['start'])
