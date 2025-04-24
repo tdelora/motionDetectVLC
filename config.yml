@@ -29,10 +29,6 @@ bored-videos:
 gpio-config:
   led-status: True # Use LED to indicate status
   button-ops: True # Enable button operations
+  add-unknown-pairs: False # Add unknown key/value pairs to the dictionary.
   gpioPins: {'redPin':13,'greenPin':6,'bluePin':18,'buttonPin':16,'motionPin':12}
   ledStatusColors: {'start':"#FF0000",'bored':"#0000FF",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
-
-# Optional led-status contols if the led status light system is enabled
-# True: enables
-# False: disables
-led-status: True

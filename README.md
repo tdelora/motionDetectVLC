@@ -51,5 +51,6 @@ Hardware utilized (Ordered from Amazon):
 Other Notes:
 - Originally written as part of a Halloween jumpscare gag, it has been cleaned up for genetic use.
 - starting-video and no-motion-video can be used to place the screen in an acceptable state when no video is playing. 
+- Boolean add-unknown-pairs in the gpio-config allows new key/value pairs to be added to the dictionary making the the dictionaries and class to be extensable without code changes.
 - Initial development was on a Raspberry Pi 3b however the device struggled with some videos, including seg faults. Problems ended with the new Raspberry Pi 5.
 - VLC on Raspberry Pi works best with codec H264 videos. Codec ProRes videos do cause issues, especially in fullscreen mode.
