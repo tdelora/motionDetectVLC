@@ -19,7 +19,7 @@ Optional yaml Parameters:
 - os-environment (dictionary): OS environment variables to be set as the script starts.
 
 Optional GPIO Parameters:
-- gpio-config (dictionary): Dictionary for GPIO pins, LED status color and other related settings. Not all dictionaries or dictionary entries are needed, if a setting is not specified the default values are utilized. Member dictionaries and their parameters:
+- gpio-config (dictionary): Dictionary for GPIO pins, LED status color and other related settings. Not all dictionaries or dictionary entries are needed, if a setting is not specified the default values are utilized. Member key/value pairs:
     - led-status (boolean): Enable the LED status operations. Default: True
     - button-ops (boolean): Enable the button operations. Default: True
     - add-unknown-pairs (boolean): Allow the yaml configuration file to add entries to the dictionaries. Default: False
