@@ -7,6 +7,7 @@ https://newbiely.com/tutorials/raspberry-pi/raspberry-pi-led-rgb
 Thank you newbiely.com
 """
 
+from gpiozero import MotionSensor
 import RPi.GPIO as GPIO
 import mdvUtils
 import time
@@ -17,16 +18,27 @@ Class gpioCtrlClass is a GPIO pin controller class.
 
 class gpioCtrlClass:
 
-	gpioPins = {'redPin':13,'greenPin':6,'bluePin':18,'buttonPin':16}
+	# GPIO layout 
+	gpioPins = {'redPin':13,'greenPin':6,'bluePin':18,'buttonPin':16,'motionPin':12}
+
+	# Motion detection variables
+	pirSensor = None
+
+	# LED Ops variables
+	showLED = True
 	ledStatusColors = {'start':"#FF0000",'bored':"#0000FF",'no_motion':"#ff8000",'motion':"#301934",'waiting':"#00FF00"}
 
+	# Button Ops variables
+	buttonOps = True
 	buttonCallable = None
 	buttonPressTime = 0
+
+	# Misc variables
+	addUnknown = False
 
 	# Function __init__ is the initializer for this class.
 
 	def __init__(self):
-		self.showLED = False
 		GPIO.setmode(GPIO.BCM)
 
 
@@ -53,15 +65,14 @@ class gpioCtrlClass:
 	# and pass it along to self.buttonCallable, where the user can act on the event. 
 
 	def buttonEvent(self,channel):
-		global buttonPressTime
 
 		if GPIO.input(self.gpioPins["buttonPin"]):
 			# The button has been pressed, mark the time.
-			buttonPressTime = time.time()
+			self.buttonPressTime = time.time()
 		else:
 			# The button has been released
 			buttonReleaseTime = time.time()
-			elapsed_time = buttonReleaseTime - buttonPressTime
+			elapsed_time = buttonReleaseTime - self.buttonPressTime
 
 			# By this time self.buttonCallable should have been verified to be a callable.
 			# However lets check because I am paranoid...
@@ -78,12 +89,36 @@ class gpioCtrlClass:
 
 	def configure(self,gpioConfig):
 		returnValue = True
-		addUnknown = False
 
 		if type(gpioConfig) is dict:
+
+			# Check for new showLED state
+			tmpBool = mdvUtils.findKey(gpioConfig,"led-status")
+			if type(tmpBool) is bool:
+				self.showLED = tmpBool
+			elif tmpBool != None:
+				print(f"mdvLED.configure: Value received for led-status is a " + type(tmpBool) + "not a boolean")
+				returnValue = False
+
+			# Check for new buttonOps state
+			tmpBool = mdvUtils.findKey(gpioConfig,"button-ops")
+			if type(tmpBool) is bool:
+				self.buttonOps = tmpBool
+			elif tmpBool != None:
+				print(f"mdvLED.configure: Value received for button-ops is a " + type(tmpBool) + "not a boolean")
+				returnValue = False
+
+			# Check if the dictionaries should add unknown key/value pairs.
+			tmpBool = mdvUtils.findKey(gpioConfig,"add-unknown-pairs")
+			if type(tmpBool) is bool:
+				self.addUnknown = tmpBool
+			elif tmpBool != None:
+				print(f"mdvLED.configure: Value received for add-unknown-pairs is a " + type(tmpBool) + "not a boolean")
+				returnValue = False
+
 			# Check each dictionary seperately so all issues will be displayed at once vs one at a time
-			pinReturnValue, self.gpioPins = mdvUtils.dictionaryUpdate(mdvUtils.findKey(gpioConfig,"gpioPins"),self.gpioPins,addUnknown,mdvUtils.validateGPIOPin)
-			modeReturnValue, self.ledStatusColors = mdvUtils.dictionaryUpdate(mdvUtils.findKey(gpioConfig,"ledStatusColors"),self.ledStatusColors,addUnknown,mdvUtils.validateHexColor)
+			pinReturnValue, self.gpioPins = mdvUtils.dictionaryUpdate(mdvUtils.findKey(gpioConfig,"gpioPins"),self.gpioPins,self.addUnknown,mdvUtils.validateGPIOPin)
+			modeReturnValue, self.ledStatusColors = mdvUtils.dictionaryUpdate(mdvUtils.findKey(gpioConfig,"ledStatusColors"),self.ledStatusColors,self.addUnknown,mdvUtils.validateHexColor)
 			if pinReturnValue != True or modeReturnValue != True:
 				# One of the dictionaries had an issue
 				returnValue = False
@@ -101,31 +136,56 @@ class gpioCtrlClass:
 
 
 	# Function start sets up the GPIO configuration specified in dictionary gpioPins, calls start if bool showLED is set to true
-	# and sets up for button operations if userButtonCallable is a callable.
+	# and sets up for button operations if buttonOps is True and userButtonCallable is a callable.
 
-	def start(self,showLED,userButtonCallable):
-		self.showLED = showLED
+	def start(self,motionCallable,noMotionCallable,userButtonCallable):
+		returnValue = True
 
-		if self.showLED:
-			GPIO.setup([self.gpioPins["redPin"], self.gpioPins["greenPin"],self.gpioPins["bluePin"]],GPIO.OUT)
-			self.RED = GPIO.PWM(int(self.gpioPins["redPin"]), 1000)
-			self.GREEN = GPIO.PWM(int(self.gpioPins["greenPin"]), 1000)
-			self.BLUE = GPIO.PWM(int(self.gpioPins["bluePin"]), 1000)
+		# Verify the callables
+		if callable(motionCallable) != True:
+			print(f"gpioCtrlClass.start: Received motionCallable is uncallable type " + type(userButtonCallable))
+			returnValue = False
 
-			self.RED.start(0)
-			self.GREEN.start(0)
-			self.BLUE.start(0)
+		if callable(noMotionCallable) != True:
+			print(f"gpioCtrlClass.start: Received noMotionCallable is uncallable type " + type(userButtonCallable))
+			returnValue = False
 
-		if userButtonCallable != None:
-			# The user has passed us somthing...
-			if callable(userButtonCallable):
-				# ... and it is a function. Set buttonCallable to point to userButtonCallable
-				# and set up for button ops.
-				self.buttonCallable = userButtonCallable
-				GPIO.setup(self.gpioPins["buttonPin"], GPIO.IN)
-				GPIO.add_event_detect(self.gpioPins["buttonPin"],GPIO.BOTH,callback=self.buttonEvent)
-			else:
-				print(f"gpioCtrlClass.start: userButtonCallable is uncallable type " + type(userButtonCallable) + ", button ops disabled.")
+		if callable(userButtonCallable) != True:
+			print(f"gpioCtrlClass.start: Received userButtonCallable is uncallable type " + type(userButtonCallable))
+			returnValue = False
+
+		# If returnValue is True then we are good to start
+		if returnValue:
+			self.pirSensor = MotionSensor(self.gpioPins["motionPin"])
+			self.pirSensor.when_motion = motionCallable
+			self.pirSensor.when_no_motion = noMotionCallable
+
+			if self.showLED:
+				GPIO.setup([self.gpioPins["redPin"], self.gpioPins["greenPin"],self.gpioPins["bluePin"]],GPIO.OUT)
+				self.RED = GPIO.PWM(int(self.gpioPins["redPin"]), 1000)
+				self.GREEN = GPIO.PWM(int(self.gpioPins["greenPin"]), 1000)
+				self.BLUE = GPIO.PWM(int(self.gpioPins["bluePin"]), 1000)
+
+				self.RED.start(0)
+				self.GREEN.start(0)
+				self.BLUE.start(0)
+
+			if self.buttonOps:
+				if userButtonCallable != None:
+					# The user has passed us somthing usable
+					if callable(userButtonCallable):
+						# ... and it is a function. Set buttonCallable to point to userButtonCallable
+						# and set up for button ops.
+						self.buttonCallable = userButtonCallable
+						GPIO.setup(self.gpioPins["buttonPin"], GPIO.IN)
+						GPIO.add_event_detect(self.gpioPins["buttonPin"],GPIO.BOTH,callback=self.buttonEvent)
+					else:
+						print(f"gpioCtrlClass.start: userButtonCallable is uncallable type " + type(userButtonCallable) + ", button ops disabled.")
+
+			# Finally set the LED color to the start color
+			self.setColor(self.ledStatusColors['start'])
+
+		return returnValue
 
 	# Function stop calls stop for the specified GPIO.PWM pins  if bool showLED is set to true.
 

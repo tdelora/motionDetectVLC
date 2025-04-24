@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 
-from gpiozero import MotionSensor
 from pathlib import Path
 import signal
 import os, sys, threading, time, vlc, yaml
 import mdvUtils
 from mdvGPIOCtrl import gpioCtrlClass
 
-
-#OS environment setup 
 osEnvironment = {}
 
 # Initial VLC setup: Create VLC instance and player
@@ -18,8 +15,7 @@ vlcPlayer = vlcInstance.media_player_new()
 # Other VLC related variables
 vlcFullscreen = True
 
-# Motion sensor setup
-motionSensorPin = 12
+# Motion sensor triggers
 triggers = 0
 
 # Video to play when the program starts
@@ -41,9 +37,8 @@ timeUntilBored = 180
 currentBoredVideo = 0
 boredVideoList = ""
 
-# Optionally an LED can be utilized to indicate the current execution status
+# gpioCtrl handles all GPIO pin functions
 gpioCtrl = gpioCtrlClass()
-showLEDStatus = False
 
 try:
 	#
@@ -64,7 +59,6 @@ try:
 		global vlcFullscreen
 		global motionSensorPin
 		global gpioCtrl
-		global showLEDStatus
 		returnValue = True
 
 		fileCheck = Path(configFile)
@@ -147,22 +141,6 @@ try:
 			else:
 				print(f"vlc-fullscreen specified in {configFile} is not a bool")
 
-			# Set motionSensorPin (Optional, Defaulted to pin 12, and will be none if no key/value pair is present)
-			motionSensorPinTmp = mdvUtils.findKey(data,"motion-sensor-pin")
-			if motionSensorPinTmp != None:
-				if mdvUtils.validateGPIOPin("motion-sensor-pin",motionSensorPinTmp):
-					motionSensorPin = motionSensorPinTmp
-				else:
-					# motion-sensor-pin was not valid for some reason.
-					returnValue = False
-
-			# showLEDStatus has a default value of False, check if an updated value has been provided.
-			boolTmp = mdvUtils.findKey(data,"led-status")
-			if type(boolTmp) is bool:
-				showLEDStatus = boolTmp
-			else:
-				print(f"led-status specified in {configFile} is not a bool")
-
 			# New GPIO configuraions (pin numbers, status colors) may have been provided
 			returnValue = gpioCtrl.configure(mdvUtils.findKey(data,"gpio-config"))
 
@@ -195,6 +173,8 @@ try:
 	#
 
 	def proccessButtonEvent(duration):
+		global gpioCtrl
+
 		# print(f"proccessButtonEvent: {duration:.2f}")
 
 		# If a button press is less than 5 seconds, we should toggle VLC full screen,
@@ -235,7 +215,7 @@ try:
 				time.sleep(3)
 				while vlcPlayer.is_playing():
 					time.sleep(1)
-				gpioCtrl.setColor(gpioCtrlClass.ledStatusColors['waiting'])
+				gpioCtrl.setColor(gpioCtrl.ledStatusColors['waiting'])
 			else:
 				print()
 				print("A video is currently playing")
@@ -265,7 +245,7 @@ try:
 		print()
 		print(f"Motion {triggers} detected...")
 
-		playVideo(motionVideoList[currentMotionVideo],gpioCtrlClass.ledStatusColors['motion'])
+		playVideo(motionVideoList[currentMotionVideo],gpioCtrl.ledStatusColors['motion'])
 
 		currentMotionVideo += 1
 		if currentMotionVideo == len(motionVideoList):
@@ -282,7 +262,7 @@ try:
 		print()
 		print("No motion...")
 		if noMotionVideo != None and len(noMotionVideo):
-			playVideo(noMotionVideo,gpioCtrlClass.ledStatusColors['no_motion'])
+			playVideo(noMotionVideo,gpioCtrl.ledStatusColors['no_motion'])
 		print("No motion detected complete")
 
 
@@ -314,7 +294,7 @@ try:
 
 		print()
 		print("I'm bored...")
-		playVideo(boredVideoList[currentBoredVideo],gpioCtrlClass.ledStatusColors['bored'])
+		playVideo(boredVideoList[currentBoredVideo],gpioCtrl.ledStatusColors['bored'])
 		currentBoredVideo += 1
 		if currentBoredVideo == len(boredVideoList):
 			currentBoredVideo = 0
@@ -350,21 +330,15 @@ try:
 					for key,value in osEnvironment.items():
 						os.environ[key] = value
 
-				gpioCtrl.start(showLEDStatus,proccessButtonEvent)
-				gpioCtrl.setColor(gpioCtrlClass.ledStatusColors['start'])
+				if gpioCtrl.start(motionDetected,noMotionDetected,proccessButtonEvent):
+					vlcPlayer.set_fullscreen(vlcFullscreen)
+					setBoredTimer()
 
-				vlcPlayer.set_fullscreen(vlcFullscreen)
+					print()
+					print(os.path.basename(__file__) + " started")
+					print()
 
-				pir = MotionSensor(motionSensorPin)
-				pir.when_motion = motionDetected
-				pir.when_no_motion = noMotionDetected
-				print("Detection started")
-				print()
-
-				setBoredTimer()
-				playVideo(startingVideo,gpioCtrlClass.ledStatusColors['start'])
-
-				signal.pause()
+					signal.pause()
 		else:
 			print()
 			print("Please provide a config yaml file")
